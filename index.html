@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo List</title>
+  </head>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+
+    body {
+      background-color: oklch(13% 0.028 261.692);
+      color: white;
+      margin: 0;
+      font-family: "Inter", sans-serif;
+    }
+
+    .container {
+      max-width: 36rem;
+      margin-left: auto;
+      margin: auto;
+      padding: 2rem;
+      margin-top: 1rem;
+    }
+
+    form {
+      box-sizing: border-box;
+      background-color: oklch(21% 0.034 264.665);
+      padding: 2rem;
+      margin-top: 1rem;
+    }
+
+    form,
+    input,
+    .task,
+    .add-btn,
+    .completed-btn,
+    .delete-btn {
+      border-radius: 0.4rem;
+      border: none;
+      border-radius: 0.4rem;
+      box-shadow:
+        0 4px 6px -1px rgb(0 0 0 / 0.1),
+        0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    input {
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      display: block;
+      box-sizing: border-box;
+    }
+
+    .add-btn {
+      background-color: oklch(62.3% 0.214 259.815);
+    }
+
+    .add-btn,
+    .completed-btn,
+    .delete-btn {
+      cursor: pointer;
+      padding: 0.7rem 1.5rem;
+      color: white;
+    }
+
+    ul {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .task {
+      background-color: oklch(92.8% 0.006 264.531);
+      color: black;
+      list-style: none;
+      margin: 0;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Utilities */
+    .line-through {
+      text-decoration: line-through;
+    }
+
+    .task-completed {
+      background-color: oklch(21% 0.034 264.665);
+      color: inherit;
+    }
+
+    .completed-btn {
+      background-color: oklch(72.3% 0.219 149.579);
+    }
+    .delete-btn {
+      background-color: oklch(58.6% 0.253 17.585);
+    }
+  </style>
+  <body>
+    <div class="container">
+      <form id="todoForm">
+        <h1>Task List</h1>
+        <input type="text" id="taskInput" placeholder="New Task" required />
+        <button type="submit" class="add-btn">Add</button>
+      </form>
+      <ul id="taskList">
+      </ul>
+    </div>
+    <script>
+      const todoForm = document.getElementById("todoForm");
+      const taskInput = document.getElementById("taskInput");
+      const taskList = document.getElementById("taskList");
+
+      const tasks = []; // creo il mio stato che aggiornerà gli eventi del DOM dinamicamente
+
+      todoForm.addEventListener("submit", (e) => {
+        e.preventDefault(); // evito il comportamente di default del form
+
+        const inputValue = taskInput.value.trim(); // prendo e pulisco il valore dell'input dagli spazi a destra e a sinistra
+        if (inputValue == "") return; // aggiungo una verifica in più all'input
+
+        // Creo un oggetto che farà da modello di ogni task
+        const newTask = {
+          task: inputValue,
+          isCompleted: false,
+          id: generateId(),
+        };
+
+        tasks.push(newTask); // pusho l'oggetto dentro l'array
+        renderTask(); // renderizzo le task
+        taskInput.value = ""; // svuoto l'input del form
+      });
+
+      //   creo la funzione render task
+      function renderTask() {
+        taskList.innerHTML = "";
+        tasks.forEach((task) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<span>${task.task}</span>
+          <div>
+            <button
+              data-id="${task.id}"
+              title="bottone per segnare la task completa"
+              class="completed-btn"
+            >
+              Done
+            </button>
+            <button
+              data-id= "${task.id}"
+              class="delete-btn"
+              title="bottone per elinimare la task"
+            >
+              Delete
+            </button>
+          </div>`;
+
+          li.className = "task";
+
+          if (task.isCompleted) {
+            li.classList.add("task-completed");
+            const span = li.querySelector("span");
+            span.classList = "line-through";
+            console.log(task);
+          }
+          taskList.appendChild(li);
+        });
+      }
+
+      //   applico un event delegation dove la ul andrà a ascoltare i click e a indicare di che elemento si tratta
+
+      taskList.addEventListener("click", (e) => {
+        const target = e.target;
+
+        if (target.classList.contains("delete-btn")) {
+          const taskId = target.dataset.id;
+          deleteTask(taskId);
+        } else if (target.classList.contains("completed-btn")) {
+          const taskId = target.dataset.id;
+          toggleCompleted(taskId);
+        }
+      });
+
+      //   creo la funzione per rimuovere una task
+      function deleteTask(taskId) {
+        const taskIndex = tasks.findIndex((task) => task.id === taskId);
+        if (taskIndex !== -1) {
+          tasks.splice(taskIndex, 1);
+        }
+        renderTask(); // renderizzo la task alla fine.
+      }
+
+      //   creo la funzione per segnare completata una task
+      function toggleCompleted(taskId) {
+        const task = tasks.find((task) => task.id === taskId);
+
+        if (task) {
+          task.isCompleted = !task.isCompleted;
+          renderTask();
+        }
+      }
+
+      //   creo la funzione che genera l'id
+      function generateId() {
+        return "_" + Math.random().toString(36).slice(2, 9);
+      }
+    </script>
+  </body>
+</html>
